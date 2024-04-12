@@ -1,37 +1,29 @@
-#define SCL_PIN 22
-#define SDI_PIN 23
-#define CS_PIN 21
+#define SCL_PIN 26
+#define SDI_PIN 25
+#define CS_PIN 27
 
 #define ALLOCATE_ARRAY_CHUNK_SIZE 16
 // Pins des LEDs
-const int ledPins[] = {5, 18, 19, 21};
+const int ledPins[] = {33, 15, 32, 14};
  
 // Pins des boutons
-const int buttonPins[] = {12, 14, 27, 26};
+const int buttonPins[] = {5, 18, 19, 16};
  
 // Pin du buzzer
-const int buzzerPin = 4;
+const int buzzerPin = 13;
 
 int currentLengthOfSequence = 0;
  
 void printWholeArray(byte *arr) {
-
   int i = 0;
-
   while(arr[i] != 0) {
-
     Serial.print("Index ");
-
     Serial.print(i);
-
     Serial.print(": ");
-
     Serial.print(arr[i]);
-
     Serial.println();
- 
-    i++;
 
+    i++;
   }
 
 }
@@ -57,37 +49,22 @@ byte* addToArray(byte numberToAdd, byte *arr, int *currentArraySize) {
 }
  
 void readSequence(byte *arr) {
-
   for (int i = 0; i < currentLengthOfSequence; i++) {
-
     byte currentInSequence = arr[i] - 1;
-
     digitalWrite(ledPins[currentInSequence], HIGH);
-
     tone(buzzerPin, 1000);
-
     delay(500);
-
     digitalWrite(ledPins[currentInSequence], LOW);
-
     noTone(buzzerPin);
-
     delay(500);
-
   }
-
 }
  
 byte* realocateArrayToNewSize(byte *oldArray, int oldSize, int newSize) {
-
   byte *newArray = emptyArray(newSize);
-
   memcpy(newArray, oldArray, oldSize);
-
   free(oldArray);
-
   return newArray;
-
 }
  
 byte* emptyArray(int size) {
@@ -95,7 +72,6 @@ byte* emptyArray(int size) {
   byte *array = (byte *)malloc(size * sizeof(byte));
 
   for(int i = 0; i < size; i++)
-
     array[i] = 0;
 
   return array;
@@ -115,9 +91,7 @@ bool usersTurnToPressButtons(byte *arr) {
     int pressedButton = 0;
 
     for(;;) {
-
       for(int j = 0; j < 4; j++) {
-
         if (digitalRead(buttonPins[j]) == LOW) {
 
           pressedButton = j + 1;
@@ -130,12 +104,10 @@ bool usersTurnToPressButtons(byte *arr) {
 
           digitalWrite(ledPins[j], LOW);
 
-           noTone(buzzerPin);
+          noTone(buzzerPin);
 
           break;
-
         }
-
       }
  
       if (pressedButton != 0) break;
@@ -143,21 +115,17 @@ bool usersTurnToPressButtons(byte *arr) {
       currentTime = millis();
  
       if (currentTime - startTime >= maxTime)
-
         return false;
-
     }
 
     if (pressedButton != arr[i]) {
-
       return false;
-
     }
-
   }
 
-  return true;
+  writeString((unsigned char*)"GAGNER!");
 
+  return true;
 }
  
 void setup() {
@@ -175,18 +143,17 @@ void setup() {
   
   initLCD_SPI(SCL_PIN, SDI_PIN, CS_PIN);
 
-  writeString((unsigned char*)"Newhaven Display----");
-  setCursor(0x40);
-  writeString((unsigned char*)" - Character LCD");
-  setCursor(0x14);
-  writeString((unsigned char*)" - Serial LCD");
-  setCursor(0x54);
-  writeString((unsigned char*)"  -> I2C, SPI, RS232");
+  // writeString((unsigned char*)"Newhaven Display----");
+  // setCursor(0x40);
+  // writeString((unsigned char*)" - Character LCD");
+  // setCursor(0x14);
+  // writeString((unsigned char*)" - Serial LCD");
+  // setCursor(0x54);
+  // writeString((unsigned char*)"  -> I2C, SPI, RS232");
 }
 
  
 void loop() {
-
   byte *arr = emptyArray(ALLOCATE_ARRAY_CHUNK_SIZE);
   int currentArraySize = ALLOCATE_ARRAY_CHUNK_SIZE;
 
