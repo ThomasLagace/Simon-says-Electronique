@@ -672,4 +672,3 @@ void underlineCursorON()
   prefix();
   write(0x47);
 }
-
