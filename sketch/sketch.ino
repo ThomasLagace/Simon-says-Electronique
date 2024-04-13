@@ -1,3 +1,16 @@
+/**
+ * Code pour le jeu "Simon says".
+ *
+ * 12 avril 2024.
+ * 
+ * Par:
+ * Thomas Lagacé [https://github.com/ThomasLagace]
+ * Schneider Pierre [https://github.com/Shnei92]
+ * Logan Bessette [https://github.com/LoganBess]
+ * Kouassi Fidele Tanoh [https://github.com/fideletanoh]
+ */
+
+/* Définition des constantes globales et des structures utilisées. */
 #define SCL_PIN 26
 #define SDI_PIN 25
 #define CS_PIN 27
@@ -7,12 +20,14 @@ const int LED_PINS[] = {33, 15, 32, 14};
 const int BUTTON_PINS[] = {5, 18, 19, 16};
 const int BUZZER_PIN = 13;
 
+// Structure qui permet de stocker une séquence.
 typedef struct {
   byte *arrayPointer;
-  unsigned int allocatedSize;
-  unsigned int length;
+  unsigned int allocatedSize; /// < Largeur en byte de la mémoire allouée pour la séquence.
+  unsigned int length;        /// < Le nombre d'éléments dans la liste.
 } SequenceList;
 
+/* ------- */
 
 void setup() {
   Serial.begin(9600);
@@ -24,7 +39,8 @@ void setup() {
     pinMode(BUTTON_PINS[i], INPUT_PULLUP);
 
   pinMode(BUZZER_PIN, OUTPUT);
-  
+
+  // Initialisation de l'écran LCD
   initLCD_SPI(SCL_PIN, SDI_PIN, CS_PIN);
 
   // writeString((unsigned char*)"Newhaven Display----");
@@ -37,11 +53,14 @@ void setup() {
 }
  
 void loop() {
+  // Creation d'une nouvelle séquence
   SequenceList sequence;
   sequence.arrayPointer = emptyArray(ALLOCATE_ARRAY_CHUNK_SIZE);
   sequence.allocatedSize = ALLOCATE_ARRAY_CHUNK_SIZE;
   sequence.length = 0;
 
+  // Loop infinie pour le jeu
+  // Une itération == un round
   for(;;) {
     addToSequence(random(1, sizeof(LED_PINS) / sizeof(LED_PINS[0]) + 1), &sequence);
     readSequence(&sequence);
@@ -58,6 +77,16 @@ void loop() {
   sequence.arrayPointer = NULL;
 }
 
+/**
+ * @brief Ajoute un chiffre à une séquence.
+ * 
+ * Ajoute un chiffre à une séquence,
+ * si la séquence est trop petite, l'agrandi pour le prochain chiffre.
+ *
+ * @param numberToAdd Le chiffre à ajouter à la séquence.
+ * @param sequence Un pointeur vers une séquence.
+ * @return rien
+ */
 void addToSequence(byte numberToAdd, SequenceList *sequence) {
   if (sequence->length >= sequence->allocatedSize - 1) {
     int newSize = ALLOCATE_ARRAY_CHUNK_SIZE * (sequence->allocatedSize / ALLOCATE_ARRAY_CHUNK_SIZE + 1);
@@ -69,6 +98,12 @@ void addToSequence(byte numberToAdd, SequenceList *sequence) {
   sequence->length++;
 }
 
+/**
+ * @brief Lit une séquence et active la DEL associée.
+ * 
+ * @param sequence Pointeur vers une séquence.
+ * @return Rien
+ */
 void readSequence(SequenceList *sequence) {
   for (int i = 0; i < sequence->length; i++) {
     byte currentInSequence = sequence->arrayPointer[i] - 1;
@@ -83,6 +118,16 @@ void readSequence(SequenceList *sequence) {
   }
 }
 
+/**
+ * @brief Tour au joueur de faire une séquence dans l'ordre.
+ * 
+ * Itère à travers toute une séquence.
+ * À chaque chiffre, attend l'input du joueur,
+ * ou le joueur prend trop de temps à répondre et retourne faux.
+ *
+ * @param sequence Pointeur vers une séquence.
+ * @return Vrai si les bouttons sont appuyés dans l'ordre, sinon faux.
+ */
 bool usersTurnToPressButtons(SequenceList *sequence) {
   for(int i = 0; i < sequence->length; i++) {
     unsigned long maxTime = 5000;
@@ -108,6 +153,12 @@ bool usersTurnToPressButtons(SequenceList *sequence) {
   return true;
 }
 
+/**
+ * @brief Attend l'input d'un boutton.
+ *
+ * @param maxTime Temps maximum pour répondre.
+ * @return Le numéro du boutton ou "0" si le temps est expiré.
+ */
 int waitForButtonPressOrMaxTime(long maxTime) {
   unsigned long startTime = millis();
   unsigned long currentTime;
@@ -143,6 +194,16 @@ void loseAnimation() {
   delay(1000);
 }
 
+/* Manipulation d'arrays */
+
+/**
+ * @brief Copie une ancienne array dans une plus grande partie allouée.
+ *
+ * @param oldArray Pointeur vers l'ancienne array.
+ * @param oldSize Ancienne largeur de l'ancienne array.
+ * @param newSize Nouvelle largeur de l'array.
+ * @return Pointeur vers la nouvelle array.
+ */
 byte* realocateArrayToNewSize(byte *oldArray, int oldSize, int newSize) {
   byte *newArray = emptyArray(newSize);
   memcpy(newArray, oldArray, oldSize);
@@ -150,6 +211,12 @@ byte* realocateArrayToNewSize(byte *oldArray, int oldSize, int newSize) {
   return newArray;
 }
 
+/**
+ * @brief Retourne un pointeur vers une array alloué vide.
+ *
+ * @param size Largeur de l'array en byte.
+ * @return Pointeur vers l'array vide.
+ */
 byte* emptyArray(int size) {
   byte *array = (byte *)malloc(size * sizeof(byte));
   for(int i = 0; i < size; i++)
@@ -157,6 +224,8 @@ byte* emptyArray(int size) {
   
   return array;
 }
+
+/* -------- */
 
 /***********************************************************
  * Serial_LCD.ino
