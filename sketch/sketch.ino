@@ -143,7 +143,7 @@ bool usersTurnToPressButtons(SequenceList *sequence) {
 
     digitalWrite(LED_PINS[pressedButton - 1], HIGH);
     playBuzzerWithLedNumber(pressedButton);
-    delay(500);
+    delay(350);
 
     digitalWrite(LED_PINS[pressedButton - 1], LOW);
     noTone(BUZZER_PIN);
