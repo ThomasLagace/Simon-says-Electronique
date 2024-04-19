@@ -1,7 +1,7 @@
 /**
  * Code pour le jeu "Simon says".
  *
- * 12 avril 2024.
+ * 19 avril 2024.
  * 
  * Par:
  * Thomas Lagacé [https://github.com/ThomasLagace]
