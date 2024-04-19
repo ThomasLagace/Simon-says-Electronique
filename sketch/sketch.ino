@@ -62,6 +62,7 @@ void loop() {
   // Loop infinie pour le jeu
   // Une itération == un round
   for(;;) {
+    startOfRoundAnimation(&sequence);
     addToSequence(random(1, sizeof(LED_PINS) / sizeof(LED_PINS[0]) + 1), &sequence);
     readSequence(&sequence);
 
@@ -70,7 +71,7 @@ void loop() {
       break;
     }
 
-    delay(500);
+    winRoundAnimation();
   }
 
   free(sequence.arrayPointer);
@@ -109,7 +110,7 @@ void readSequence(SequenceList *sequence) {
     byte currentInSequence = sequence->arrayPointer[i] - 1;
 
     digitalWrite(LED_PINS[currentInSequence], HIGH);
-    tone(BUZZER_PIN, 1000);
+    playBuzzerWithLedNumber(currentInSequence + 1);
     delay(500);
 
     digitalWrite(LED_PINS[currentInSequence], LOW);
@@ -141,14 +142,12 @@ bool usersTurnToPressButtons(SequenceList *sequence) {
     }
 
     digitalWrite(LED_PINS[pressedButton - 1], HIGH);
-    tone(BUZZER_PIN, 1000);
+    playBuzzerWithLedNumber(pressedButton);
     delay(500);
 
     digitalWrite(LED_PINS[pressedButton - 1], LOW);
     noTone(BUZZER_PIN);
   }
-
-  writeString((unsigned char*)"GAGNER!");
 
   return true;
 }
@@ -176,6 +175,36 @@ int waitForButtonPressOrMaxTime(long maxTime) {
   }
 }
 
+void startOfRoundAnimation(SequenceList *sequence) {
+  clearScreen();
+
+  char str[30];
+
+  sprintf(str, "Niveau %d", sequence->length + 1);
+
+  setCursor(0x6);
+
+  writeString((unsigned char *)str);
+
+  delay(1000);
+}
+
+void winRoundAnimation() {
+  clearScreen();
+
+  setCursor(0x2B);
+
+  writeString((unsigned char*)"**!GAGNER!**");
+
+  delay(1000);
+
+  setCursor(0x56);
+
+  writeString((unsigned char*)"Niveau Suivant!");
+
+  delay(1000);
+}
+
 void loseAnimation() {
   for(int i = 0; i < sizeof(LED_PINS) / sizeof(LED_PINS[0]); i++)
     digitalWrite(LED_PINS[i], HIGH);
@@ -192,6 +221,26 @@ void loseAnimation() {
     digitalWrite(LED_PINS[i], LOW);
   
   delay(1000);
+}
+
+void playBuzzerWithLedNumber(int ledNumber) {
+  switch(ledNumber) {
+    case 1:
+      tone(BUZZER_PIN, 1000);
+      break;
+    case 2:
+      tone(BUZZER_PIN, 1040);
+      break;
+    case 3:
+      tone(BUZZER_PIN, 1080);
+      break;
+    case 4:
+      tone(BUZZER_PIN, 1120);
+      break;
+    default:
+      tone(BUZZER_PIN, 1000);
+      break;
+  }
 }
 
 /* Manipulation d'arrays */
