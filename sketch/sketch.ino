@@ -3,6 +3,8 @@
  *
  * 19 avril 2024.
  * 
+ * Repo git: https://github.com/ThomasLagace/Simon-says-Electronique
+ *
  * Par:
  * Thomas Lagacé [https://github.com/ThomasLagace]
  * Schneider Pierre [https://github.com/Shnei92]
